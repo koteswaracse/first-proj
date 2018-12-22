@@ -1,0 +1,40 @@
+1. Using sqoop, import orders table into hdfs to folders "/user/cloudera/problem1/orders. File should be loaded as Avro File and use snappy compression.
+
+
+
+8. Create mysql table named result and load data from "/user/hive/warehouse/emp" to mysql table named emp
+mysql -h localhost -u root -p
+enter password
+
+show databases;
+
+use abc;
+
+show tables;
+
+select * from emp;
+
+sqoop import \
+--connect jdbc:mysql://localhost/abc \
+--username root \
+--password root \
+--table emp \
+--target-dir /user/hive/warehouse/emp;
+
+deletefrom emp;
+
+sqoop export \
+--table emp \
+--connect jdbc:mysql://localhost/abc \
+--username root \
+--password root \
+--export-dir /user/hive/warehouse/emp \
+--columns "id,name";
+
+
+select * from emp;
+
+1.Import all the tables from mysql database into hdfs as avro data files use compression and the compression codec should be snappy data warehouse directory should be retail_stage_db.
+ans:
+sqoop import-all-tables --connect "jdbc:mysql://localhost/hive_mysql_db" --username "root" --password "root" --warehouse-dir "/user/hive/warehouse/hive_mysql_db_stage"  -m 1;
+

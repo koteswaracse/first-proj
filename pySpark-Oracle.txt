@@ -1,0 +1,81 @@
+We are starting Apache Spark from the linux terminal with Pyspark interface (Python Interface).
+/spark-2.1.0-bin-hadoop2.7/bin/pyspark 
+--jars "/home/jars/ojdbc6.jar" 
+--master yarn-client 
+--num-executors 10 
+--driver-memory 16g 
+--executor-memory 8g
+
+We started Apache Spark. Now let's write the Python code to read the data from the database and run it.
+empDF = spark.read \
+    .format("jdbc") \
+    .option("url", "jdbc:oracle:thin:username/password@//hostname:portnumber/SID") \
+    .option("dbtable", "hr.emp") \
+    .option("user", "db_user_name") \
+    .option("password", "password") \
+    .option("driver", "oracle.jdbc.driver.OracleDriver") \
+    .load()
+
+Let's take a look at the contents of this dataframe as we write to the empDF dataframe.
+empDF.printSchema()
+empDF.show()
+
+
+Yes, I connected directly to the Oracle database with Apache Spark. Likewise, it is possible to get a query result in the same way.
+
+query = "(select empno,ename,dname from emp, dept where emp.deptno = dept.deptno) emp"
+empDF = spark.read \
+    .format("jdbc") \
+    .option("url", "jdbc:oracle:thin:username/password@//hostname:portnumber/SID") \
+    .option("dbtable", query) \
+    .option("user", "db_user_name") \
+    .option("password", "password") \
+    .option("driver", "oracle.jdbc.driver.OracleDriver") \
+    .load()
+empDF.printSchema()
+empDF.show()
+
+
+sqlContext = SQLContext(sc)
+   ora_tmp=spark.read.format('jdbc').options(
+        url=Oracle_CONNECTION_URL,
+        dbtable="tablename",
+        driver="oracle.jdbc.OracleDriver"
+        ).load() 
+
+
+# download MS SQL jdbc driver
+curl -o /tmp/sqljdbc42.jar https://cernbox.cern.ch/index.php/s/X23rvfIygUbLlAl/download
+ 
+pyspark --driver-class-path /tmp/sqljdbc42.jar --jars /tmp/sqljdbc42.jar
+ 
+mssql_df = spark.read.format('jdbc') \
+ .options(url='jdbc:sqlserver://mydbserver.cern.ch;databaseName=UC;user=hadoop_user;password=mypassword',dbtable='HadoopDemoTable') \
+ .load()
+mssql_df.printSchema()
+mssql_df.show()
+
+
+
+pyspark --driver-class-path /tmp/ojdbc7.jar --jars /tmp/ojdbc7.jar
+ 
+orcl_df = spark.read.format('jdbc') \
+    .options(driver='oracle.jdbc.driver.OracleDriver',url='jdbc:oracle:thin:username/password@hostname:port/servicename',dbtable='applications') \
+    .load()
+orcl_df.printSchema()
+orcl_df.show()
+
+jdbc:postgresql://host:port/database[?propertyName1=propertyValue1][&propertyName2=propertyValue2]...
+
+
+spark-submit --jars "L:\\Pyspark_Snow\\ojdbc6.jar" yourscript.py
+
+
+You should probably also set driver-class-path as jars sends the jar file only to workers, not the driver.
+
+That said, you should be very careful when setting JVM configuration in the python code as you need to make sure the JVM loads with them (you can't add them later). You can try setting PYSPARK_SUBMIT_ARGS e.g.:
+
+export PYSPARK_SUBMIT_ARGS="--jars jarname --driver-class-path jarname pyspark-shell"
+
+This will tell pyspark to add these options to the JVM loading the same as if you would have added it in the command line
+
